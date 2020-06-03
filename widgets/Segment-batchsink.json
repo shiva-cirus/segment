@@ -1,55 +1,147 @@
 {
   "metadata": {
-    "spec-version": "1.0"
+    "spec-version": "1.6"
   },
+  "display-name": "Segment",
   "configuration-groups": [
     {
-      "label": "Text FileSet Source Configuration",
+      "label": "Basic",
       "properties": [
         {
-          "widget-type": "dataset-selector",
-          "label": "FileSet Name",
-          "name": "fileSetName"
+          "widget-type": "textbox",
+          "label": "Reference Name",
+          "name": "referenceName",
+          "widget-attributes": {
+            "placeholder": "Name used to identify this sink for lineage"
+          }
+        },
+        {
+          "widget-type": "select",
+          "label": "Operation Type",
+          "name": "operationType",
+          "widget-attributes": {
+            "default": "Identify",
+            "values": [
+              "Identify",
+              "Track",
+              "Screen",
+              "Page",
+              "Group",
+              "Alias"
+            ]
+          }
         },
         {
           "widget-type": "textbox",
-          "label": "Input files within the FileSet",
-          "name": "files"
+          "label": "Input field containing writeKey",
+          "name": "writeKey",
+          "description": "Field name containing the Write Key to be used for Segment API. "
         },
         {
-          "widget-type": "select",
-          "label": "Create FileSet if it does not exist",
-          "name": "createIfNotExists",
+          "widget-type": "textbox",
+          "label": "Input field containing userId",
+          "name": "userId",
+          "description": "Field name containing the userID to be used for Segment API. "
+        },
+        {
+          "widget-type": "keyvalue",
+          "label": "Traits Mappings",
+          "name": "traitsMappings",
           "widget-attributes" : {
-            "values": [
-              "true",
-              "false"
-            ],
-            "default": "false"
+            "placeholder": "Mappings from record field to Traits. Column names must be formatted as k=v;k=v;.",
+            "delimiter": ";",
+            "kv-delimiter": "="
           }
         },
         {
-          "widget-type": "select",
-          "label": "Delete data read on pipeline run success",
-          "name": "deleteInputOnSuccess",
+          "widget-type": "keyvalue",
+          "label": "Context Mappings",
+          "name": "contextMappings",
           "widget-attributes" : {
-            "values": [
-              "true",
-              "false"
-            ],
-            "default": "false"
+            "placeholder": "Mappings from record field to Context. Column names must be formatted as k=v;k=v;.",
+            "delimiter": ";",
+            "kv-delimiter": "="
           }
+        }
+      ]
+    },
+    {
+      "label" : "Advanced",
+      "properties" : [
+        {
+          "widget-type": "number",
+          "label": "Connection Timeout in seconds",
+          "name": "connectTimeOut",
+          "widget-attributes": {
+            "default": "15",
+            "min": "1",
+            "max": "60"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Read Timeout in seconds",
+          "name": "readTimeOut",
+          "widget-attributes": {
+            "default": "15",
+            "min": "1",
+            "max": "60"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Write Timeout in seconds",
+          "name": "readTimeOut",
+          "widget-attributes": {
+            "default": "15",
+            "min": "1",
+            "max": "60"
+          }
+
         }
       ]
     }
   ],
-  "outputs": [
-    {
-      "widget-type": "non-editable-schema-editor",
-      "schema": {
-        "position": "long",
-        "text": "string"
+  "outputs": [ ],
+  "jump-config": {
+    "datasets": [
+      {
+        "ref-property-name": "referenceName"
       }
+    ]
+  },
+  "filters": [
+    {
+      "name": "showIdentifyProperties",
+      "condition": {
+        "expression": "operationType == 'Identify'"
+      },
+      "show": [
+        {
+          "type": "property",
+          "name": "userId"
+        },
+        {
+          "type": "property",
+          "name": "traitsMappings"
+        },
+        {
+          "type": "property",
+          "name": "contextMappings"
+        }
+      ]
+    },
+    {
+      "name": "showIdentifyProperties",
+      "condition": {
+        "expression": "operationType == 'Track'"
+      },
+      "show": [
+        {
+          "type": "property",
+          "name": "userId"
+        }
+      ]
     }
   ]
 }

@@ -1,4 +1,58 @@
 package io.cdap.plugin.common;
 
+import com.jakewharton.retrofit.Ok3Client;
+import com.segment.analytics.Analytics;
+import com.segment.analytics.messages.IdentifyMessage;
+import okhttp3.OkHttpClient;
+import retrofit.client.Client;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 public class SegmentClient {
+
+  private static Map<String,SegmentClient> segmentClientMap = new HashMap<String,SegmentClient>();
+  private Analytics analytics;
+
+
+  private SegmentClient(String writeKey, int connectTimeout, int readTimeout, int writeTimeout  ){
+     analytics =
+      Analytics.builder(writeKey)
+        .client(createClient(connectTimeout,readTimeout,writeTimeout))
+        .build();
+  }
+
+  public static SegmentClient getInstance(String writeKey, int connectTimeout, int readTimeout, int writeTimeout){
+
+    if (segmentClientMap.containsKey(writeKey)){
+      return segmentClientMap.get(writeKey);
+    }
+    SegmentClient instance = new SegmentClient(writeKey,connectTimeout,readTimeout,writeTimeout);
+    segmentClientMap.put(writeKey,instance);
+    return instance;
+  }
+
+  private static Client createClient(int connectTimeout, int readTimeout, int writeTimeout ) {
+    return new Ok3Client(
+      new OkHttpClient.Builder()
+        .connectTimeout(connectTimeout, TimeUnit.SECONDS)
+        .readTimeout(readTimeout, TimeUnit.SECONDS)
+        .writeTimeout(writeTimeout, TimeUnit.SECONDS)
+        .build());
+  }
+
+  private void identify(String userId, Map<String,String> traits, Map<String,String> context){
+    analytics.enqueue(IdentifyMessage.builder()
+                        .userId(userId)
+                        .traits(traits)
+                        .context(context)
+                      );
+
+  }
+
+
+
+
+
 }

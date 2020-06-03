@@ -13,7 +13,7 @@ import java.io.IOException;
 public class SegmentSinkOutformat extends OutputFormat<NullWritable, StructuredRecord> {
   @Override
   public RecordWriter<NullWritable, StructuredRecord> getRecordWriter(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-    return null;
+    return new SegmentRecordWriter(taskAttemptContext);
   }
 
   @Override

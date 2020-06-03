@@ -31,6 +31,7 @@
     <cdap.version>6.1.2</cdap.version>
     <cdap.plugin.version>2.4.0-SNAPSHOT</cdap.plugin.version>
     <hadoop.version>2.9.2</hadoop.version>
+    <segment.version>LATEST</segment.version>
     <!-- properties for script build step that creates the config files for the artifacts -->
     <widgets.dir>widgets</widgets.dir>
     <docs.dir>docs</docs.dir>
@@ -51,6 +52,13 @@
   </repositories>
 
   <dependencies>
+
+      <dependency>
+        <groupId>com.segment.analytics.java</groupId>
+        <artifactId>analytics</artifactId>
+        <version>${segment.version}</version>
+      </dependency>
+
     <dependency>
       <groupId>io.cdap.plugin</groupId>
       <artifactId>format-common</artifactId>
