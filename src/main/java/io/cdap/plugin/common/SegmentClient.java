@@ -4,6 +4,8 @@ import com.jakewharton.retrofit.Ok3Client;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.messages.IdentifyMessage;
 import okhttp3.OkHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit.client.Client;
 
 import java.util.HashMap;
@@ -14,9 +16,10 @@ public class SegmentClient {
 
   private static Map<String,SegmentClient> segmentClientMap = new HashMap<String,SegmentClient>();
   private Analytics analytics;
-
+  private static final Logger LOG = LoggerFactory.getLogger(SegmentClient.class);
 
   private SegmentClient(String writeKey, int connectTimeout, int readTimeout, int writeTimeout  ){
+    LOG.debug("Creating Segment Analytics client with Key "+writeKey);
      analytics =
       Analytics.builder(writeKey)
         .client(createClient(connectTimeout,readTimeout,writeTimeout))
@@ -25,7 +28,9 @@ public class SegmentClient {
 
   public static SegmentClient getInstance(String writeKey, int connectTimeout, int readTimeout, int writeTimeout){
 
+
     if (segmentClientMap.containsKey(writeKey)){
+      LOG.debug("Reusing Segment Analytics client with Key "+writeKey);
       return segmentClientMap.get(writeKey);
     }
     SegmentClient instance = new SegmentClient(writeKey,connectTimeout,readTimeout,writeTimeout);

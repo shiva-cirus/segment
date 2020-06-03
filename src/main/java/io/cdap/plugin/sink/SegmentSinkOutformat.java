@@ -23,6 +23,31 @@ public class SegmentSinkOutformat extends OutputFormat<NullWritable, StructuredR
 
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-    return null;
+    return new OutputCommitter() {
+      @Override
+      public void setupJob(JobContext jobContext) {
+
+      }
+
+      @Override
+      public void setupTask(TaskAttemptContext taskAttemptContext) {
+
+      }
+
+      @Override
+      public boolean needsTaskCommit(TaskAttemptContext taskAttemptContext) {
+        return false;
+      }
+
+      @Override
+      public void commitTask(TaskAttemptContext taskAttemptContext) {
+
+      }
+
+      @Override
+      public void abortTask(TaskAttemptContext taskAttemptContext) {
+
+      }
+    };
   }
 }

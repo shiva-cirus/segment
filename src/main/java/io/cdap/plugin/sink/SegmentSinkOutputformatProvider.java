@@ -34,6 +34,6 @@ public class SegmentSinkOutputformatProvider implements OutputFormatProvider {
 
   @Override
   public Map<String, String> getOutputFormatConfiguration() {
-    return null;
+    return configMap;
   }
 }

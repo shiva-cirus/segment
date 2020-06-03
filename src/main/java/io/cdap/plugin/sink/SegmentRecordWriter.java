@@ -2,6 +2,7 @@ package io.cdap.plugin.sink;
 
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.format.UnexpectedFormatException;
+import io.cdap.plugin.common.SegmentClient;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -42,8 +43,12 @@ public class SegmentRecordWriter extends RecordWriter<NullWritable, StructuredRe
   @Override
   public void write(NullWritable nullWritable, StructuredRecord structuredRecord) throws IOException, InterruptedException {
 
+
     // Using the Structured Record get the Value of Write Key
     String writeKeyVal = getValue(structuredRecord::get, writeKey, "String", String.class);
+    LOG.debug("Processing record with value = "+writeKeyVal);
+    SegmentClient client = SegmentClient.getInstance(writeKeyVal,connectTimeout,readTimeout,writeTimeout);
+
 
 
 
@@ -51,6 +56,8 @@ public class SegmentRecordWriter extends RecordWriter<NullWritable, StructuredRe
 
   @Override
   public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+    // Here forcefully flush and wait till its completed.
+
 
   }
 

@@ -30,19 +30,16 @@ public class SegmentSinkConfig extends PluginConfig {
     return referenceName;
   }
 
-  public SegmentOperationType getOperationType(FailureCollector collector) {
+  private void validateOperationType(FailureCollector collector) {
     Optional<SegmentOperationType> soperationType = SegmentOperationType.fromValue(operationType);
-
-
     if (soperationType.isPresent()) {
-      return soperationType.get();
+      return;
     }
-
     collector.addFailure("Unsupported Operation type value: " + operationType,
                          String.format("Supported types are: %s", SegmentOperationType.getSupportedTypes()))
       .withConfigProperty(PROPERTY_OPERATION_TYPE);
     collector.getOrThrowException();
-    return null;
+    return;
   }
 
   public String getOperationType(){
@@ -158,6 +155,7 @@ public class SegmentSinkConfig extends PluginConfig {
 
 
   public void validate(@Nullable Schema inputSchema, FailureCollector collector) {
+    validateOperationType(collector);
     validateConnectionTimeout(collector);
     validateReadTimeout(collector);
     validateWriteTimeout(collector);
@@ -189,10 +187,10 @@ public class SegmentSinkConfig extends PluginConfig {
       return;
     }
 
-    Map<String,String> traits =  parseKeyValueConfig(traitsMappings, ",", "=");
+    Map<String,String> traits =  parseKeyValueConfig(traitsMappings, ";", "=");
     for (String fieldName : traits.values()) {
       if (inputSchema.getField(fieldName) == null) {
-        collector.addFailure(String.format("Invalid field name  %s specified.", userId),
+        collector.addFailure(String.format("Invalid field name  %s specified.", fieldName),
                              String.format("Ensure the field is defined in Input schema."))
           .withConfigProperty(PROPERTY_TRAITS_PROPERTIES);
 
@@ -210,7 +208,7 @@ public class SegmentSinkConfig extends PluginConfig {
     Map<String, String> context = parseKeyValueConfig(contextMappings, ",", "=");
     for (String fieldName : context.values()) {
       if (inputSchema.getField(fieldName) == null) {
-        collector.addFailure(String.format("Invalid field name  %s specified.", userId),
+        collector.addFailure(String.format("Invalid field name  %s specified.", fieldName),
                              String.format("Ensure the field is defined in Input schema."))
           .withConfigProperty(PROPERTY_CONTEXT_PROPERTIES);
 
