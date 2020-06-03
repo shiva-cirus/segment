@@ -3,6 +3,8 @@ package io.cdap.plugin.sink;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.format.UnexpectedFormatException;
 import io.cdap.plugin.common.SegmentClient;
+import io.cdap.plugin.common.SegmentOperationType;
+import io.cdap.plugin.common.StringUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -11,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 public class SegmentRecordWriter extends RecordWriter<NullWritable, StructuredRecord> {
@@ -48,16 +52,28 @@ public class SegmentRecordWriter extends RecordWriter<NullWritable, StructuredRe
     String writeKeyVal = getValue(structuredRecord::get, writeKey, "String", String.class);
     LOG.debug("Processing record with value = "+writeKeyVal);
     SegmentClient client = SegmentClient.getInstance(writeKeyVal,connectTimeout,readTimeout,writeTimeout);
-
-
-
-
+    if (SegmentOperationType.IDENTIFY == SegmentOperationType.fromValue(operationType).get()){
+      String userIdVal = getValue(structuredRecord::get, userId, "String", String.class);
+      Map<String,String> traitsKVMappings = StringUtil.parseKeyValueConfig(traitsMappings, ";", "=");
+      Map<String,String> traits = new HashMap<String,String>();
+      for (Map.Entry<String,String> entry : traitsKVMappings.entrySet()) {
+        String val = getValue(structuredRecord::get, entry.getValue(), "String", String.class);
+        traits.put(entry.getKey(), val);
+      }
+      Map<String,String> contextKVMappings = StringUtil.parseKeyValueConfig(contextMappings, ";", "=");
+      Map<String,String> context = new HashMap<String,String>();
+      for (Map.Entry<String,String> entry : contextKVMappings.entrySet()) {
+        String val = getValue(structuredRecord::get, entry.getValue(), "String", String.class);
+        context.put(entry.getKey(), val);
+      }
+      client.identify(userIdVal,traits,context);
+    }
   }
 
   @Override
   public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     // Here forcefully flush and wait till its completed.
-
+      SegmentClient.flushAll();
 
   }
 

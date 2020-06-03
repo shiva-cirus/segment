@@ -8,8 +8,8 @@ import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.common.SegmentOperationType;
+import io.cdap.plugin.common.StringUtil;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -173,7 +173,6 @@ public class SegmentSinkConfig extends PluginConfig {
     if (containsMacro(PROPERTY_SEGMENT_USERID)) {
       return;
     }
-
     if (inputSchema.getField(userId) == null) {
       collector.addFailure(String.format("Invalid field name  %s specified.", userId),
                            String.format("Ensure the field is defined in Input schema."))
@@ -187,7 +186,7 @@ public class SegmentSinkConfig extends PluginConfig {
       return;
     }
 
-    Map<String,String> traits =  parseKeyValueConfig(traitsMappings, ";", "=");
+    Map<String,String> traits = StringUtil.parseKeyValueConfig(traitsMappings, ";", "=");
     for (String fieldName : traits.values()) {
       if (inputSchema.getField(fieldName) == null) {
         collector.addFailure(String.format("Invalid field name  %s specified.", fieldName),
@@ -205,7 +204,7 @@ public class SegmentSinkConfig extends PluginConfig {
     if (containsMacro(PROPERTY_SEGMENT_USERID) || Strings.isNullOrEmpty(contextMappings)) {
       return;
     }
-    Map<String, String> context = parseKeyValueConfig(contextMappings, ",", "=");
+    Map<String, String> context = StringUtil.parseKeyValueConfig(contextMappings, ",", "=");
     for (String fieldName : context.values()) {
       if (inputSchema.getField(fieldName) == null) {
         collector.addFailure(String.format("Invalid field name  %s specified.", fieldName),
@@ -254,34 +253,7 @@ public class SegmentSinkConfig extends PluginConfig {
   }
 
 
-  /**
-   * Utilty class to parse the keyvalue string from UI Widget and return back HashMap.
-   * String is of format  <key><keyValueDelimiter><value><delimiter><key><keyValueDelimiter><value>
-   * eg:  networktag1=out2internet;networktag2=priority
-   * The return from the method is a map with key value pairs of (networktag1 out2internet) and (networktag2 priority)
-   *
-   * @param configValue       String to be parsed into key values format
-   * @param delimiter         Delimiter used for keyvalue pairs
-   * @param keyValueDelimiter Delimiter between key and value.
-   * @return Map of Key value pairs parsed from input configValue using the delimiters.
-   */
-  public static Map<String, String> parseKeyValueConfig(@Nullable String configValue, String delimiter,
-                                                        String keyValueDelimiter) throws IllegalArgumentException {
-    Map<String, String> map = new HashMap<>();
-    if (configValue == null) {
-      return map;
-    }
-    for (String property : configValue.split(delimiter)) {
-      String[] parts = property.split(keyValueDelimiter, 2);
-      if (parts.length != 2) {
-        throw new IllegalArgumentException("Invalid KeyValue " + property);
-      }
-      String key = parts[0];
-      String value = parts[1];
-      map.put(key, value);
-    }
-    return map;
-  }
+
 
 
 }

@@ -47,7 +47,7 @@ public class SegmentClient {
         .build());
   }
 
-  private void identify(String userId, Map<String,String> traits, Map<String,String> context){
+  public void identify(String userId, Map<String,String> traits, Map<String,String> context){
     analytics.enqueue(IdentifyMessage.builder()
                         .userId(userId)
                         .traits(traits)
@@ -56,7 +56,17 @@ public class SegmentClient {
 
   }
 
+  private void flush()
+  {
+    analytics.flush();
+  }
 
+  public static void flushAll(){
+
+    for (SegmentClient clnt : segmentClientMap.values()) {
+      clnt.flush();
+    }
+  }
 
 
 
