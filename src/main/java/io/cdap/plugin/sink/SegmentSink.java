@@ -44,10 +44,19 @@ public class SegmentSink extends BatchSink<StructuredRecord, NullWritable, Map<S
     config.validate(inputSchema, collector);
     collector.getOrThrowException();
 
+    String operationType = config.getOperationType();
+    String writeKey = config.getWriteKey();
+    String userId = config.getUserId();
+    String traits = config.getTraitsMappings();
+    String context = config.getContextMappings();
+    String connectionTimeout = Integer.toString(config.getConnectTimeOut());
+    String readTimeout = Integer.toString(config.getReadTimeOut());
+    String writeTimeout = Integer.toString(config.getWriteTimeOut());
+
     batchSinkContext.addOutput(Output.of(config.getReferenceName(),
-                                         new SegmentSinkOutputformatProvider(config.getConnectTimeOut(),
-                                                                             config.getReadTimeOut(),
-                                                                             config.getWriteTimeOut())));
+                                         new SegmentSinkOutputformatProvider(operationType,writeKey,userId,traits,
+                                                                             context,connectionTimeout,readTimeout,
+                                                                             writeTimeout)));
 
     LineageRecorder lineageRecorder = new LineageRecorder(batchSinkContext, config.getReferenceName());
     lineageRecorder.createExternalDataset(inputSchema);

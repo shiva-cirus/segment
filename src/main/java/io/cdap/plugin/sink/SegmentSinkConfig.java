@@ -9,7 +9,6 @@ import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.common.SegmentOperationType;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -32,9 +31,11 @@ public class SegmentSinkConfig extends PluginConfig {
   }
 
   public SegmentOperationType getOperationType(FailureCollector collector) {
-    SegmentOperationType operationType = getOperationType();
-    if (operationType != null) {
-      return operationType;
+    Optional<SegmentOperationType> soperationType = SegmentOperationType.fromValue(operationType);
+
+
+    if (soperationType.isPresent()) {
+      return soperationType.get();
     }
 
     collector.addFailure("Unsupported Operation type value: " + operationType,
@@ -44,10 +45,8 @@ public class SegmentSinkConfig extends PluginConfig {
     return null;
   }
 
-  public SegmentOperationType getOperationType() {
-    Optional<SegmentOperationType> soperationType = SegmentOperationType.fromValue(operationType);
-
-    return soperationType.isPresent() ? soperationType.get() : null;
+  public String getOperationType(){
+    return operationType;
   }
 
 
@@ -55,16 +54,14 @@ public class SegmentSinkConfig extends PluginConfig {
     return userId;
   }
 
-  public Map<String, String> getTraitsMappings() {
-    return Strings.isNullOrEmpty(traitsMappings) ? Collections.emptyMap() :
-      parseKeyValueConfig(traitsMappings, ",", "=");
+  @Nullable
+  public String getTraitsMappings() {
+    return traitsMappings;
   }
 
-
   @Nullable
-  public Map<String, String> getContextMappings() {
-    return Strings.isNullOrEmpty(contextMappings) ? Collections.emptyMap() :
-      parseKeyValueConfig(contextMappings, ",", "=");
+  public String getContextMappings() {
+    return contextMappings;
   }
 
   public int getConnectTimeOut() {
@@ -188,11 +185,11 @@ public class SegmentSinkConfig extends PluginConfig {
   }
 
   private void validateTraits(Schema inputSchema, FailureCollector collector) {
-    if (containsMacro(PROPERTY_SEGMENT_USERID)) {
+    if (containsMacro(PROPERTY_SEGMENT_USERID) || Strings.isNullOrEmpty(traitsMappings)) {
       return;
     }
 
-    Map<String, String> traits = getTraitsMappings();
+    Map<String,String> traits =  parseKeyValueConfig(traitsMappings, ",", "=");
     for (String fieldName : traits.values()) {
       if (inputSchema.getField(fieldName) == null) {
         collector.addFailure(String.format("Invalid field name  %s specified.", userId),
@@ -207,10 +204,10 @@ public class SegmentSinkConfig extends PluginConfig {
 
 
   private void validateContext(Schema inputSchema, FailureCollector collector) {
-    if (containsMacro(PROPERTY_SEGMENT_USERID)) {
+    if (containsMacro(PROPERTY_SEGMENT_USERID) || Strings.isNullOrEmpty(contextMappings)) {
       return;
     }
-    Map<String, String> context = getContextMappings();
+    Map<String, String> context = parseKeyValueConfig(contextMappings, ",", "=");
     for (String fieldName : context.values()) {
       if (inputSchema.getField(fieldName) == null) {
         collector.addFailure(String.format("Invalid field name  %s specified.", userId),
