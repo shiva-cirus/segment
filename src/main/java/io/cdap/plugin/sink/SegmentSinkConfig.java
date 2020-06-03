@@ -21,7 +21,7 @@ public class SegmentSinkConfig extends PluginConfig {
   public static final String PROPERTY_SEGMENT_WRITEKEY = "writeKey";
   public static final String PROPERTY_SEGMENT_USERID = "userId";
   public static final String PROPERTY_TRAITS_PROPERTIES = "traitsMappings";
-  public static final String PROPERTY_CONTEXT_PROPERTIES = "contextMappingsMappings";
+  public static final String PROPERTY_CONTEXT_PROPERTIES = "contextMappings";
   public static final String PROPERTY_SEGEMENT_CONNECTIONTIMEOUT = "connectTimeOut";
   public static final String PROPERTY_SEGEMENT_READTIMEOUT = "readTimeOut";
   public static final String PROPERTY_SEGEMENT_WRITETIMEOUT = "writeTimeOut";
@@ -85,7 +85,6 @@ public class SegmentSinkConfig extends PluginConfig {
   }
 
 
-
   @Name("referenceName")
   @Description("This will be used to uniquely identify this sink for lineage, annotating metadata, etc.")
   protected String referenceName;
@@ -110,6 +109,7 @@ public class SegmentSinkConfig extends PluginConfig {
   @Name(PROPERTY_TRAITS_PROPERTIES)
   @Description("Input Schema fields to be passed as Traits properties.")
   @Macro
+  @Nullable
   private String traitsMappings;
 
   @Name(PROPERTY_CONTEXT_PROPERTIES)
@@ -146,7 +146,7 @@ public class SegmentSinkConfig extends PluginConfig {
    * Constructor
    */
 
-  public SegmentSinkConfig(String referenceName,String operationType, String writeKey, String userId, String traitsMappings, String contextMappings,
+  public SegmentSinkConfig(String referenceName, String operationType, String writeKey, String userId, @Nullable  String traitsMappings, @Nullable  String contextMappings,
                            int connectTimeOut, int readTimeOut, int writeTimeOut) {
     this.referenceName = referenceName;
     this.operationType = operationType;
@@ -170,7 +170,7 @@ public class SegmentSinkConfig extends PluginConfig {
       // Check if Traits properties in Input Schema
       validateTraits(inputSchema, collector);
       // Check if Context Properties in Input Schma
-      validateContext(inputSchema,collector);
+      validateContext(inputSchema, collector);
     }
   }
 
@@ -183,20 +183,18 @@ public class SegmentSinkConfig extends PluginConfig {
       collector.addFailure(String.format("Invalid field name  %s specified.", userId),
                            String.format("Ensure the field is defined in Input schema."))
         .withConfigProperty(PROPERTY_SEGMENT_USERID);
-
     }
 
   }
-
 
   private void validateTraits(Schema inputSchema, FailureCollector collector) {
     if (containsMacro(PROPERTY_SEGMENT_USERID)) {
       return;
     }
 
-    Map<String,String> traits = getTraitsMappings();
-    for (String fieldName : traits.values()){
-      if ( inputSchema.getField(fieldName) == null){
+    Map<String, String> traits = getTraitsMappings();
+    for (String fieldName : traits.values()) {
+      if (inputSchema.getField(fieldName) == null) {
         collector.addFailure(String.format("Invalid field name  %s specified.", userId),
                              String.format("Ensure the field is defined in Input schema."))
           .withConfigProperty(PROPERTY_TRAITS_PROPERTIES);
@@ -212,10 +210,9 @@ public class SegmentSinkConfig extends PluginConfig {
     if (containsMacro(PROPERTY_SEGMENT_USERID)) {
       return;
     }
-
-    Map<String,String> context = getContextMappings();
-    for (String fieldName : context.values()){
-      if ( inputSchema.getField(fieldName) == null){
+    Map<String, String> context = getContextMappings();
+    for (String fieldName : context.values()) {
+      if (inputSchema.getField(fieldName) == null) {
         collector.addFailure(String.format("Invalid field name  %s specified.", userId),
                              String.format("Ensure the field is defined in Input schema."))
           .withConfigProperty(PROPERTY_CONTEXT_PROPERTIES);

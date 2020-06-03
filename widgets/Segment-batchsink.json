@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "spec-version": "1.6"
+    "spec-version": "1.5"
   },
   "display-name": "Segment",
   "configuration-groups": [
@@ -48,7 +48,7 @@
           "label": "Traits Mappings",
           "name": "traitsMappings",
           "widget-attributes" : {
-            "placeholder": "Mappings from record field to Traits. Column names must be formatted as k=v;k=v;.",
+            "placeholder": "Mappings from Input field to Traits.",
             "delimiter": ";",
             "kv-delimiter": "="
           }
@@ -58,7 +58,7 @@
           "label": "Context Mappings",
           "name": "contextMappings",
           "widget-attributes" : {
-            "placeholder": "Mappings from record field to Context. Column names must be formatted as k=v;k=v;.",
+            "placeholder": "Mappings from Input field to Traits.",
             "delimiter": ";",
             "kv-delimiter": "="
           }
@@ -91,13 +91,12 @@
         {
           "widget-type": "number",
           "label": "Write Timeout in seconds",
-          "name": "readTimeOut",
+          "name": "writeTimeOut",
           "widget-attributes": {
             "default": "15",
             "min": "1",
             "max": "60"
           }
-
         }
       ]
     }
@@ -119,6 +118,10 @@
       "show": [
         {
           "type": "property",
+          "name": "writeKey"
+        },
+        {
+          "type": "property",
           "name": "userId"
         },
         {
@@ -132,11 +135,15 @@
       ]
     },
     {
-      "name": "showIdentifyProperties",
+      "name": "showTrackProperties",
       "condition": {
         "expression": "operationType == 'Track'"
       },
       "show": [
+        {
+          "type": "property",
+          "name": "writeKey"
+        },
         {
           "type": "property",
           "name": "userId"
